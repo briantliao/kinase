@@ -3,6 +3,15 @@
 ## Overview
 The aim of this design document is to outline a robust and scalable pipeline for processing a list of YouTube videos. This includes downloading videos, segmenting them, converting to audio, generating text transcripts, and renaming and uploading these segments back to YouTube.
 
+## Dependencies
+
+```sh
+brew install yt-dlp
+brew install ffmpeg
+```
+
+`cookies.txt`, downloaded such as with [Get cookies.txt LOCALLY](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)
+
 ## Pipeline Components
 The pipeline consists of seven core components. These include:
 
