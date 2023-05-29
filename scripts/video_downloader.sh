@@ -16,5 +16,4 @@ else
   echo "File not found: $file_path"
 fi
 
-# default is yt-dlp -f "bv+ba/b" best video/audio merged
-yt-dlp --cookies $cookies_path -S "+size,+br" -o "videos/%(title)s/%(title)s.%(ext)s" $text
+yt-dlp --cookies $cookies_path -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4' -o "videos/%(title)s/%(title)s.%(ext)s" $text

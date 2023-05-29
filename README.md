@@ -1,7 +1,7 @@
 # Kinase: A Lecture Series to 10 Min Mini-Lecture Processing Pipeline
 
 ## Overview
-The aim of this design document is to outline a robust and scalable pipeline for processing a list of YouTube videos. This includes downloading videos, segmenting them, converting to audio, generating text transcripts, and renaming and uploading these segments back to YouTube.
+This outline a robust and scalable pipeline for processing a list of YouTube videos. This includes downloading videos, segmenting them, converting to audio, generating text transcripts, and renaming and uploading these segments back to YouTube.
 
 ## Dependencies
 
@@ -60,7 +60,3 @@ This script is responsible for uploading the renamed videos to YouTube. It needs
     |    |    |    |--- segment_audio
     |    |    |    |--- segment_transcript
 ```
-
-## Conclusion
-The pipeline described above provides an end-to-end solution for processing YouTube videos. Its modular nature allows for future improvements and scaling in each individual component.
-
