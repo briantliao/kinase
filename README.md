@@ -1,5 +1,9 @@
 # Kinase: A Lecture Series to 10 Min Mini-Lecture Processing Pipeline
 
+![](cancer_cell_treated_with_kinase_inhibitor_drug.jpg)
+
+Human cancer cells treated with a topoisomerase inhibitor and an inhibitor of the protein kinase ATR (ataxia telangiectasia and Rad3 related), a drug combination under study as a cancer therapy ([source](https://unsplash.com/photos/L7en7Lb-Ovc)).
+
 ## Overview
 This outline a robust and scalable pipeline for processing a list of YouTube videos. This includes downloading videos, segmenting them, converting to audio, generating text transcripts, and renaming and uploading these segments back to YouTube.
 
@@ -54,9 +58,23 @@ This script is responsible for uploading the renamed videos to YouTube. It needs
     |--- /<video>
     |    |--- original_video
     |    |--- renamed_video
-    |    |--- /segments
-    |    |    |--- /<segment>
-    |    |    |    |--- segment_video
-    |    |    |    |--- segment_audio
-    |    |    |    |--- segment_transcript
+    |    |--- /segment
+    |    |    |--- segment_video
+    |    |    |--- segment_audio
+    |    |    |--- segment_transcript
+    |    |--- /segment
+    |    |    |--- segment_video
+    |    |    |--- segment_audio
+    |    |    |--- segment_transcript
+    |--- /<video>
+    |    |--- original_video
+    |    |--- renamed_video
+    |    |--- /segment
+    |    |    |--- segment_video
+    |    |    |--- segment_audio
+    |    |    |--- segment_transcript
+    |    |--- /segment
+    |    |    |--- segment_video
+    |    |    |--- segment_audio
+    |    |    |--- segment_transcript
 ```
