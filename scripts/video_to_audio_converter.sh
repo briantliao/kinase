@@ -14,9 +14,14 @@ for video_folder in "${VIDEO_DIR}"/*; do
 
                         # Extract the base name of the video file
                         base_video_file=$(basename "${video_file}" .mp4)
+                        output_file="${segment_folder}/${base_video_file}.wav"
 
-                        # Convert the video to mp3
-                        ffmpeg -i "${video_file}" -vn -ar 44100 -ac 2 -b:a 192k "${segment_folder}/${base_video_file}.mp3"
+                        # Convert the video to wav
+                        if [ ! -f "$output_file" ]; then
+                            ffmpeg -i "${video_file}" -vn -ar 16000 -ac 2 "$output_file"
+                        else
+                            echo "File $output_file already exists."
+                        fi
                     fi
                 done
             fi

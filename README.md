@@ -16,6 +16,8 @@ brew install ffmpeg
 
 `cookies.txt`, downloaded such as with [Get cookies.txt LOCALLY](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)
 
+[whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+
 ## Pipeline Components
 The pipeline consists of seven core components. These include:
 
