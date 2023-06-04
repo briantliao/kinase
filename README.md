@@ -18,6 +18,8 @@ brew install ffmpeg
 
 [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
+Python 3.10 until [Ray](https://www.ray.io/) library updates to Python 3.11 or later
+
 ## Pipeline Components
 The pipeline consists of seven core components. These include:
 

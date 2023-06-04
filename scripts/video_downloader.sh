@@ -17,3 +17,5 @@ else
 fi
 
 yt-dlp --cookies $cookies_path -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4' -o "videos/%(title)s/%(title)s.%(ext)s" $text
+# experimental, must use with experiment_kinase2_youtube_transcription_split.py 
+# yt-dlp --cookies $cookies_path --write-sub --sub-lang en --convert-subs srt --write-auto-sub -o "videos/%(title)s/%(title)s.srt" $text
