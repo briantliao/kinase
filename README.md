@@ -2,7 +2,7 @@
 
 ![](riboflavin_kinase.png)
 
-[Source](https://commons.wikimedia.org/wiki/File:Riboflavin_kinase.png)
+Riboflavin Kinase ([Source](https://commons.wikimedia.org/wiki/File:Riboflavin_kinase.png))
 
 ## Dependencies
 
