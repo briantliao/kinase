@@ -2,7 +2,7 @@ from video_dir_helper import get_video_segments
 from dotenv import load_dotenv
 from datetime import datetime
 
-import ray
+# import ray
 import time
 import re
 import openai
@@ -12,10 +12,10 @@ import sys
 
 load_dotenv()
 
-# Doing segmented parallelization because we are hitting rate limits
+# Not doing parallelization because we are hitting rate limits
 # https://platform.openai.com/account/rate-limits
 # Initialize Ray
-ray.init()
+# ray.init()
 
 openai.api_key = os.environ.get("OPENAI_KEY")
 
@@ -34,33 +34,63 @@ def call_chatgpt_api(prompt, api_key):
     )
 
     # Introduce a delay before the next API call
-    time.sleep(15)
+    if len(prompt) > 3000:
+        time.sleep(5)
+    elif len(prompt) > 2000:
+        time.sleep(2)
+    elif len(prompt) > 1000:
+        time.sleep(1)
 
     return completion.choices[0].message["content"]
 
 
-@ray.remote
+def process_srt(srt_text):
+    # Remove empty lines
+    srt_text = re.sub(r"\n\s*\n", "\n", srt_text)
+
+    # Remove timestamps
+    srt_text = re.sub(r"\d+:\d+:\d+,\d+ --> \d+:\d+:\d+,\d+\n", "", srt_text)
+
+    # Remove pure number lines
+    srt_text = re.sub(r"^\d+(:)?\n", "", srt_text, flags=re.MULTILINE)
+
+    # Remove newlines
+    srt_text = srt_text.replace("\n", " ")
+
+    # Remove leading/trailing spaces
+    srt_text = srt_text.strip()
+
+    # Remove extra spaces
+    srt_text = re.sub(r"\s+", " ", srt_text)
+
+    return srt_text
+
+
+# @ray.remote
 def get_video_title(tot_segment_number, segment_transcript, api_key):
     print("Processing:", tot_segment_number, segment_transcript)
     i = 0
     summaries = []
+    tot_prompt_len = 0
 
     with open(segment_transcript, "r") as f:
         lines = f.readlines()
 
     while i < len(lines):
-        prompt = "".join(lines[i : i + 500]) + "Summarize above. Be concise."
+        parsed_lines = process_srt("".join(lines[i : i + 1000])) + "\n"
+        prompt = parsed_lines + "Summarize above. Be concise."
+        tot_prompt_len += len(prompt)
         response = call_chatgpt_api(prompt, api_key)
         # print("Summary:", response)
         summaries.append(response)
-        i += 500
+        i += 1000
 
-    summary = "\n".join(summaries)
+    summary = "\n".join(summaries) + "\n"
     prompt = (
         summary
         + "Generate a YouTube video title up to 10 words from the summaries above."
     )
-
+    tot_prompt_len += len(prompt)
     title_response = call_chatgpt_api(prompt, api_key)
     title_response = title_response.replace('"', "")
     # print("Title:", title_response)
@@ -69,6 +99,7 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
         summary
         + 'Generate YouTube video tags from the summaries above in the format: ["tag1", "tag2"]'
     )
+    tot_prompt_len += len(prompt)
     tags_response = call_chatgpt_api(prompt, api_key)
     try:
         tags_response = tags_response.split("]", 1)[0] + "]"
@@ -78,13 +109,15 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
     # print("Tags:", tags_response)
 
     prompt = summary + "Summarize above. Be concise."
+    tot_prompt_len += len(prompt)
     summary_response = call_chatgpt_api(prompt, api_key)
     # print("Summary:", summary_response)
 
     prompt = (
-        "".join(lines[:500])
-        + "The above is a video transcription in srt format. Give the time the speaker starts speaking. Give only the and NO other text. Use the format: 00:01:17,210."
+        "".join(lines[:100])
+        + "The above is a video transcription in srt format. Give the time the speaker starts speaking. Give only the time and NO other text. Use the format: 00:01:17,210."
     )
+    tot_prompt_len += len(prompt)
     start_time_response = call_chatgpt_api(prompt, api_key)
     try:
         # Extract the timestamp using a regular expression
@@ -125,18 +158,28 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
         )
 
     print(f"Response written to {output_name}")
+    return tot_prompt_len
 
 
 segments = get_video_segments()
 i = 0
-print("Batching 5")
 if len(sys.argv) == 2:
     i = int(sys.argv[1])
 
-while i < len(segments):
-    batch = segments[i : i + 5]
-    ray.get(
-        [get_video_title.remote(i, segment[1], openai.api_key) for segment in batch]
-    )
-    time.sleep(180)
-    i += 5
+# ray.get(
+#     [get_video_title.remote(i, segment[1], openai.api_key) for segment in segments[i:]]
+# )
+
+for j in range(i, len(segments)):
+    segment = segments[j]
+    tot_prompt_len = get_video_title(j, segment[1], openai.api_key)
+    if tot_prompt_len > 25000:
+        time.sleep(30)
+    elif tot_prompt_len > 20000:
+        time.sleep(25)
+    elif tot_prompt_len > 15000:
+        time.sleep(20)
+    elif tot_prompt_len > 10000:
+        time.sleep(15)
+    elif tot_prompt_len > 5000:
+        time.sleep(10)
