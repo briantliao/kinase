@@ -13,6 +13,7 @@ ray.init()
 # This function will be executed in parallel for each of the elements of the jobs list
 @ray.remote
 def slice_videos(video_path, srt_path, length, video_dir):
+    print("Processing:", video_path)
     subs = pysrt.open(srt_path)
     video = AudioSegment.from_file(video_path)
 
@@ -25,7 +26,7 @@ def slice_videos(video_path, srt_path, length, video_dir):
         if end > total_seconds:
             end = total_seconds
 
-            # Create a new directory for each segment
+        # Create a new directory for each segment
         segment_folder = os.path.join(video_dir, f"segment{i:03d}")
         os.makedirs(segment_folder, exist_ok=True)
 
