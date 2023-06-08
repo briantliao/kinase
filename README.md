@@ -22,7 +22,7 @@ pip install -r requirements.txt
 ## Overview
 The goal of the project is to design a processing pipeline that can convert entire lecture series into 10-minute mini-lecture segments. This pipeline will be comprised of 4 scripts with functionalities ranging from downloading the lecture series from YouTube to uploading the resulting segments back to YouTube.
 
-## Functional Requirements
+## Design
 
 ### Script 1: Download lecture series from YouTube
 The first script will leverage yt-dlp to download lecture series from YouTube. It will store the downloaded content in an mp4 format. It will also use YouTube's automatic caption feature or a speech-to-text service to generate transcripts in srt format.
@@ -47,16 +47,20 @@ The fourth script will upload each of the segmented videos, along with their ass
     |    |--- /segment
     |    |    |--- segment_video
     |    |    |--- segment_transcript
+    |    |    |--- segment_metadata
     |    |--- /segment
     |    |    |--- segment_video
     |    |    |--- segment_transcript
+    |    |    |--- segment_metadata
     |--- /<video>
     |    |--- original_video
     |    |--- renamed_video
     |    |--- /segment
     |    |    |--- segment_video
     |    |    |--- segment_transcript
+    |    |    |--- segment_metadata
     |    |--- /segment
     |    |    |--- segment_video
     |    |    |--- segment_transcript
+    |    |    |--- segment_metadata
 ```
