@@ -13,15 +13,13 @@ import random
 
 load_dotenv()
 
-# Not doing parallelization because we are hitting rate limits
+# Watch out for OpenAI rate limits
 # https://platform.openai.com/account/rate-limits
+
 # Initialize Ray
 ray.init()
 
 openai.api_key = os.environ.get("OPENAI_KEY")
-
-
-import random
 
 
 def call_chatgpt_api(prompt, api_key, max_retries=5):
@@ -70,8 +68,9 @@ def call_chatgpt_api(prompt, api_key, max_retries=5):
 
 
 def process_srt(srt_text):
-    # Split the text into lines
-    lines = srt_text.split("\n")
+    lines = srt_text
+    if type(srt_text) == str:
+        lines = srt_text.split("\n")
 
     # Remove duplicates while preserving order
     seen = set()
@@ -91,8 +90,8 @@ def process_srt(srt_text):
         ):
             processed_lines.append(line)
 
-    # Change new lines to spaces
-    processed_text = "\n".join(processed_lines)
+    # Rejoin lines
+    processed_text = "\n".join(processed_lines) + "\n"
     return processed_text
 
 
@@ -107,7 +106,7 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
         lines = f.readlines()
 
     while i < len(lines):
-        parsed_lines = process_srt("".join(lines[i : i + 1000])) + "\n"
+        parsed_lines = process_srt(lines[i : i + 1000])
         prompt = parsed_lines + "Summarize above. Be concise."
         tot_prompt_len += len(prompt)
         response = call_chatgpt_api(prompt, api_key)
@@ -213,6 +212,7 @@ ray.get(
     ]
 )
 
+# Execute Serially
 # for j in range(i, len(segments)):
 #     segment = segments[j]
 #     tot_prompt_len = get_video_title(j, segment[1], openai.api_key)
