@@ -97,7 +97,7 @@ def process_srt(srt_text):
 
 @ray.remote
 def get_video_title(tot_segment_number, segment_transcript, api_key):
-    print("Processing:", tot_segment_number, segment_transcript)
+    print(f"Processing: {tot_segment_number}, {segment_transcript}")
     i = 0
     summaries = []
     tot_prompt_len = 0
@@ -117,11 +117,11 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
     summary = "\n".join(summaries) + "\n"
     prompt = (
         summary
-        + "Generate a YouTube video title up to 10 words from the summaries above."
+        + "Generate a YouTube video title up to 5 words from the summaries above."
     )
     tot_prompt_len += len(prompt)
     title_response = call_chatgpt_api(prompt, api_key)
-    title_response = title_response.replace('"', "")
+    title_response = title_response.replace('"', "").replace(":", " -")
     # print("Title:", title_response)
 
     prompt = (
