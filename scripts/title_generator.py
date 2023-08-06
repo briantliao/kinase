@@ -117,7 +117,7 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
     summary = "\n".join(summaries) + "\n"
     prompt = (
         summary
-        + "Generate a YouTube video title up to 5 words from the summaries above."
+        + "Generate a short YouTube video title up to 5 words from the summaries above."
     )
     tot_prompt_len += len(prompt)
     title_response = call_chatgpt_api(prompt, api_key)
