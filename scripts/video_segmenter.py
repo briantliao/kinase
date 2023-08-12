@@ -3,6 +3,7 @@ from pydub import AudioSegment
 import pysrt
 import math
 import os
+import sys
 import ray
 
 # Initialize Ray
@@ -12,7 +13,7 @@ ray.init()
 # Define a remote function with the decorator @ray.remote
 # This function will be executed in parallel for each of the elements of the jobs list
 @ray.remote
-def slice_videos(video_path, srt_path, length, video_dir):
+def slice_videos(index, video_path, srt_path, length, video_dir):
     print("Processing:", video_path)
     subs = pysrt.open(srt_path)
     video = AudioSegment.from_file(video_path)
@@ -72,10 +73,15 @@ for video_dir in video_dirs:
         # Call the function with the video and subtitle file paths, and length in seconds
         jobs.append((video_file, subtitle_file, video_dir))
 
+i = 0
+if len(sys.argv) == 2:
+    i = int(sys.argv[1])
+
+
 # This will execute the function in parallel for each job.
 results = ray.get(
     [
-        slice_videos.remote(video_file, subtitle_file, 600, video_dir)
-        for (video_file, subtitle_file, video_dir) in jobs
+        slice_videos.remote(index, video_file, subtitle_file, 600, video_dir)
+        for index, (video_file, subtitle_file, video_dir) in enumerate(jobs[i:], start=i)
     ]
 )

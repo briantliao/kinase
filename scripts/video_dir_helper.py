@@ -22,9 +22,15 @@ def get_video_segments():
                 elif filename.endswith(".srt"):  # Assuming transcript files are .srt
                     segment_transcript = os.path.join(dirpath, filename)
 
-            # If both a video and transcript were found, add them to the list
+            # If both a video and transcript were found and the transcript is not empty, add them to the list
             if segment_video and segment_transcript:
-                segments.append((segment_video, segment_transcript))
+                segment_transcript_is_empty = False
+                with open(segment_transcript, "r") as file:
+                    content = file.read()
+                    segment_transcript_is_empty = len(content) == 0
+
+                if not segment_transcript_is_empty:
+                    segments.append((segment_video, segment_transcript))
 
     # Sort the list of segments by video filename and then transcript filename
     segments.sort(key=lambda x: (x[0], x[1]))
