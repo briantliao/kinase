@@ -31,6 +31,12 @@ def get_video_segments():
 
                 if not segment_transcript_is_empty:
                     segments.append((segment_video, segment_transcript))
+                else:
+                    print(f"Deleting {dirpath}")
+                    os.rmdir(dirpath)
+            else:
+                print(f"Deleting {dirpath}")
+                os.rmdir(dirpath)
 
     # Sort the list of segments by video filename and then transcript filename
     segments.sort(key=lambda x: (x[0], x[1]))

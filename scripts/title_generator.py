@@ -208,29 +208,39 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
         + "Give only the time and NO other text. Use the format: 00:01:17,210."
     )
     tot_prompt_len += len(prompt)
-    start_time_response = call_chatgpt_api(prompt, api_key)
-    try:
-        match_time = re.search(r"\d{2}:\d{2}:\d{2},\d{3}", start_time_response)
-        timestamp = match_time.group()
-        _, minute, seconds_millisec = timestamp.split(":")
-        seconds, _ = seconds_millisec.split(",")
+    retry_count = 0
+    max_retries = 5
+    while retry_count <= max_retries:
+        start_time_response = call_chatgpt_api(prompt, api_key)
+        try:
+            match_time = re.search(r"\d{2}:\d{2}:\d{2},\d{3}", start_time_response)
+            timestamp = match_time.group()  # this might error. could try a retry
+            hours, minutes, seconds_millisec = timestamp.split(":")
+            seconds, _ = seconds_millisec.split(",")
 
-        # Convert minute and second to integers
-        minute = int(minute)
-        seconds = int(seconds)
+            # Convert minute and second to integers
+            hours = int(hours)
+            minutes = int(minutes)
+            seconds = int(seconds)
 
-        match_segment = re.search(r"segment(\d+)", segment_transcript)
-        segment_number = int(match_segment.group(1))
+            match_segment = re.search(r"segment(\d+)", segment_transcript)
+            segment_number = int(match_segment.group(1))
 
-        # Extract the minutes and seconds
-        minutes = minute - 10 * segment_number
-        seconds = seconds
-        start_time_response = f"{minutes:02d}:{seconds:02d}"
-    except ValueError:
-        print(
-            f"Failed to decode time format: {start_time_response} for {segment_transcript}"
-        )
-    # print("Start Time:", start_time_response)
+            # Extract the minutes and seconds
+            minutes = minutes + 60 * hours - 10 * segment_number
+            seconds = seconds
+            start_time_response = f"{minutes:02d}:{seconds:02d}"
+            break
+        except ValueError:
+            print(
+                f"Failed to decode time format: {start_time_response} for {segment_transcript}"
+            )
+            retry_count += 1
+
+        # If max retries reached, raise an error
+        if retry_count > max_retries:
+            raise Exception("Max retries reached for time parser, aborting...")
+        # print("Start Time:", start_time_response)
 
     output_name = segment_transcript.replace(".srt", ".json")
     with open(output_name, "w") as f:

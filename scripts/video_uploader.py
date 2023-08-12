@@ -1,10 +1,11 @@
 from video_dir_helper import get_video_segments
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
-import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
+import os
+import re
 import sys
 import json
 import random
@@ -85,19 +86,47 @@ def add_video_to_playlist(credentials, video_id, playlist_id):
     return response["id"]
 
 
-def process_segment(i, segment_file, playlist_id, pre_title):
+def process_segment(i, segment_file, playlist_id):
     print(f"Processing {i}, {segment_file}")
 
     segment_metadata_file = segment_file.replace(".mp4", ".json")
     metadata = None
     with open(segment_metadata_file, "r") as f:
         metadata = json.load(f)
+
+    class_and_date = ""
+    match = re.search(
+        r"videos/([A-Za-z0-9\s-]+)/segment\d+/segment\d+\.json", segment_metadata_file
+    )
+    if match:
+        class_and_date = match.group(1)
+    else:
+        raise Exception("Cannot extract class name and date")
+
+    segment_number = 0
+    file_basename = os.path.basename(segment_metadata_file)
+    match = re.search(r"\d+", file_basename)
+    if match:
+        segment_number = int(match.group())
+    else:
+        raise Exception("Cannot extract segent number")
+
+    lecture_info = f"{class_and_date} Part: {segment_number}"
+    description = (
+        "Starts at "
+        + metadata["start_time"]
+        + "\n"
+        + lecture_info
+        + "\n"
+        + metadata["summary"]
+    )
+
     # Upload a video and add it to a playlist
     video_id = upload_video(
         credentials,
         segment_file,
-        pre_title + ": " + metadata["title"].replace(":", " -"),
-        "Starts at " + metadata["start_time"] + "\n" + metadata["summary"],
+        metadata["title"].replace(":", " -"),
+        description,
         metadata["tags"],
     )
     print(f"{segment_file} uploaded to YouTube")
@@ -109,9 +138,9 @@ def process_segment(i, segment_file, playlist_id, pre_title):
 
 
 segments = get_video_segments()
-if len(sys.argv) != 4:
+if len(sys.argv) != 3:
     print(
-        "Please pass the command as follows: python scripts/video_uploader.py <playlist_id> <pre_title> <index of first video>"
+        "Please pass the command as follows: python scripts/video_uploader.py <playlist_id> <index of first video>"
     )
     exit()
 
@@ -121,8 +150,7 @@ credentials = authenticate()
 # currently YouTube has a limit of 6 videos per day...
 
 playlist_id = sys.argv[1]
-pre_title = sys.argv[2]
-i = int(sys.argv[3])
+i = int(sys.argv[2])
 # Execute Serially
 for index, segment in enumerate(segments[i : i + 6], start=i):
-    process_segment(index, segment[0], playlist_id, pre_title)
+    process_segment(index, segment[0], playlist_id)
