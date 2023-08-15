@@ -63,49 +63,6 @@ def call_chatgpt_api(prompt, api_key, max_retries=5):
             raise Exception("Max retries reached, aborting...")
 
 
-def call_chatgpt_api_function_calling(prompt, schema, api_key, max_retries=5):
-    # Set the API key in the worker process
-    openai.api_key = api_key
-
-    # Send a chat completion request to the OpenAI API
-    retry_count = 0
-    while retry_count <= max_retries:
-        try:
-            completion = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": prompt},
-                ],
-                functions=[{"name": "generate_metadata", "parameters": schema}],
-                function_call={"name": "generate_metadata"},
-            )
-
-            # Introduce a delay before the next API call
-            if len(prompt) > 3000:
-                time.sleep(3)
-            elif len(prompt) > 2000:
-                time.sleep(2)
-            elif len(prompt) > 1000:
-                time.sleep(1)
-
-            # Successful API call, return the response
-            return completion.choices[0].message.function_call.arguments
-
-        except openai.error.RateLimitError:
-            # If we're rate limited, wait and retry
-            wait_time = (2**retry_count) + random.random() * 0.01
-            print(
-                f"Rate limit exceeded, waiting for {wait_time} seconds before retrying..."
-            )
-            time.sleep(wait_time)
-            retry_count += 1
-
-        # If max retries reached, raise an error
-        if retry_count > max_retries:
-            raise Exception("Max retries reached, aborting...")
-
-
 def process_srt(srt_text):
     lines = srt_text
     if type(srt_text) == str:
@@ -179,24 +136,6 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
     title_response = title_response.replace('"', "").replace(":", " -")
     # print("Title:", title_response)
 
-    prompt = summary + "Generate YouTube video tags from the summaries above."
-    schema = {
-        "type": "object",
-        "properties": {
-            "tags": {
-                "type": "array",
-                "description": "A list of important word tags from the summaries",
-                "items": {"type": "string"},
-            },
-        },
-        "required": ["tags"],
-    }
-
-    tot_prompt_len += len(prompt)
-    tags_response = call_chatgpt_api_function_calling(prompt, schema, api_key)
-    tags_response = json.loads(tags_response)["tags"]
-    # print("Tags:", tags_response)
-
     prompt = summary + "Summarize above. Be concise."
     tot_prompt_len += len(prompt)
     summary_response = call_chatgpt_api(prompt, api_key)
@@ -229,7 +168,9 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
             # Extract the minutes and seconds
             minutes = minutes + 60 * hours - 10 * segment_number
             seconds = seconds
-            start_time_response = f"{minutes:02d}:{seconds:02d}"
+            start_time_response = "00:00"
+            if minutes >= 0:
+                start_time_response = f"{minutes:02d}:{seconds:02d}"
             break
         except ValueError:
             print(
@@ -247,7 +188,6 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
         json.dump(
             {
                 "title": title_response,
-                "tags": tags_response,
                 "summary": summary_response,
                 "start_time": start_time_response,
             },
@@ -284,4 +224,4 @@ ray.get(
 # Execute Serially
 # for j in range(i, len(segments)):
 #     segment = segments[j]
-#     tot_prompt_len = get_video_title(j, segment[1], openai.api_key)
+#     get_video_title(j, segment[1], openai.api_key)
