@@ -6,15 +6,16 @@ import os
 import sys
 import ray
 
-# Initialize Ray
-ray.init()
+os.environ["RAY_DEDUP_LOGS"] = "0"
 
+# Initialize Ray
+ray.init(num_cpus=8)
 
 # Define a remote function with the decorator @ray.remote
 # This function will be executed in parallel for each of the elements of the jobs list
 @ray.remote
 def slice_videos(index, video_path, srt_path, length, video_dir):
-    print("Processing:", video_path)
+    print(f"Processing: {index}, {video_path}")
     subs = pysrt.open(srt_path)
     video = AudioSegment.from_file(video_path)
 

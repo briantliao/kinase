@@ -16,6 +16,8 @@ load_dotenv()
 # Watch out for OpenAI rate limits
 # https://platform.openai.com/account/rate-limits
 
+os.environ["RAY_DEDUP_LOGS"] = "0"
+
 # Initialize Ray
 ray.init()
 
@@ -172,7 +174,7 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
             if minutes >= 0:
                 start_time_response = f"{minutes:02d}:{seconds:02d}"
             break
-        except ValueError:
+        except Exception:
             print(
                 f"Failed to decode time format: {start_time_response} for {segment_transcript}"
             )

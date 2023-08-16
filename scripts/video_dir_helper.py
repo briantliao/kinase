@@ -45,6 +45,6 @@ def get_video_segments():
 
 # usage
 # segments = get_video_segments()
-# for segment_video, segment_transcript in segments:
-# print(f"Segment video: {segment_video}")
-# print(f"Segment transcript: {segment_transcript}")
+# for i, (segment_video, segment_transcript) in enumerate(segments):
+#    print(f"Segment video: {i}, {segment_video}")
+#    print(f"Segment transcript: {i}, {segment_transcript}")
