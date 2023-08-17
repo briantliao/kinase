@@ -131,7 +131,7 @@ def process_segment(i, segment_file, playlist_id):
 
     add_video_to_playlist(credentials, video_id, playlist_id)
     print(
-        f"{segment_file} added to playlist: https://www.youtube.com/playlist?list={playlist_id}"
+        f"{i}, {segment_file} added to playlist: https://www.youtube.com/playlist?list={playlist_id}"
     )
 
 

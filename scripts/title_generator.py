@@ -197,7 +197,7 @@ def get_video_title(tot_segment_number, segment_transcript, api_key):
             indent=2,
         )
 
-    print(f"Response written to {output_name}")
+    print(f"Response written to {tot_segment_number}, {output_name}")
 
     if tot_prompt_len > 25000:
         time.sleep(25)
