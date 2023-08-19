@@ -1,15 +1,16 @@
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 from pydub import AudioSegment
+
 import pysrt
 import math
 import os
 import sys
+os.environ["RAY_DEDUP_LOGS"] = "0"
 import ray
 
-os.environ["RAY_DEDUP_LOGS"] = "0"
 
 # Initialize Ray
-ray.init(num_cpus=8)
+ray.init(num_cpus=4)
 
 # Define a remote function with the decorator @ray.remote
 # This function will be executed in parallel for each of the elements of the jobs list

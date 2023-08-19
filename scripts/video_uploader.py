@@ -47,6 +47,7 @@ def authenticate():
 def upload_video(credentials, filename, title, description):
     youtube = googleapiclient.discovery.build("youtube", "v3", credentials=credentials)
 
+    # description and title may need to be url escaped urllib.parse.quote(input_string, safe='')
     request = youtube.videos().insert(
         part="snippet,status",
         body={
@@ -110,7 +111,7 @@ def process_segment(i, segment_file, playlist_id):
     else:
         raise Exception("Cannot extract segent number")
 
-    lecture_info = f"{class_and_date} Part: {segment_number + 1}"
+    lecture_info = f"{class_and_date} part {segment_number + 1}"
     description = (
         "Starts at "
         + metadata["start_time"]
@@ -127,7 +128,7 @@ def process_segment(i, segment_file, playlist_id):
         metadata["title"].replace(":", " -"),
         description,
     )
-    print(f"{segment_file} uploaded to YouTube")
+    print(f"{i}, {segment_file} uploaded to YouTube")
 
     add_video_to_playlist(credentials, video_id, playlist_id)
     print(

@@ -2,7 +2,6 @@ from video_dir_helper import get_video_segments
 from dotenv import load_dotenv
 from datetime import datetime
 
-import ray
 import time
 import re
 import openai
@@ -10,13 +9,13 @@ import os
 import json
 import sys
 import random
+os.environ["RAY_DEDUP_LOGS"] = "0"
+import ray
 
 load_dotenv()
 
 # Watch out for OpenAI rate limits
 # https://platform.openai.com/account/rate-limits
-
-os.environ["RAY_DEDUP_LOGS"] = "0"
 
 # Initialize Ray
 ray.init()
