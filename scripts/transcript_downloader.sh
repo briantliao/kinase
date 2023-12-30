@@ -16,5 +16,4 @@ else
   echo "File not found: $file_path"
 fi
 
-# if you remove videos from link.txt, it might not process them here after
-yt-dlp --cookies $cookies_path -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4' -o "videos/%(title)s/%(title)s.%(ext)s" $text
+yt-dlp --cookies $cookies_path --write-sub --sub-lang en --convert-subs srt --write-auto-sub --skip-download -o "videos/%(title)s/%(title)s" $text
